@@ -14,6 +14,8 @@ language_extensions = {
 
 data = []
 
+count_artificial = 0
+
 def check_code_file(filepath, language):
     try:
         with open(filepath, 'r', encoding='utf-8', errors='ignore') as file:
@@ -75,15 +77,21 @@ for root, dirs, files in os.walk(directory):
                             print('出问题了')
                             print('----------')
 
-                    data.append([folder_name, language, '|'.join(code_check_results), found_language_files_result])
+                        artificial_focus = ''
+                        if not code_check_results and found_language_files:
+                            artificial_focus = '需要人工检查'
+                            count_artificial += 1
+
+                    data.append([folder_name, language, '|'.join(code_check_results), found_language_files_result, artificial_focus])
                 except yaml.YAMLError as exc:
                     print(exc)
 
-df = pd.DataFrame(data, columns=['Project Name', 'Language', 'FuzzedDataProvider Lib', 'Holding'])
+df = pd.DataFrame(data, columns=['Project Name', 'Language', 'FuzzedDataProvider Lib', 'Holding', 'Artificial focus'])
 
 df = df.sort_values(by=['Project Name'], ascending=True)
 
-excel_path = 'output_lang_rawlib1.csv'
+excel_path = 'output_lang_rawlib.csv'
 df.to_csv(excel_path, index=False)
 
 print(f'Data saved to {excel_path}')
+print('Artificial focus Count: ' + str(count_artificial))
